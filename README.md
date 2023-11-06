@@ -1,4 +1,10 @@
 # Verilog
 11/6 1:17PM
-[Osc 1](SCRN0453.BMP)
-[Osc 2](SCRN0454.BMP)
+
+## OSC1
+
+![Alt text](SCRN0453.BMP?raw=true "Title")
+
+## OSC2
+
+![Alt text](SCRN0454.BMP?raw=true "Title")
