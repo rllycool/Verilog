@@ -1,4 +1,4 @@
 # Verilog
-
+11/6 1:17PM
 [Osc 1](SCRN0453.BMP)
 [Osc 2](SCRN0454.BMP)
