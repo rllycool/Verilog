@@ -5,12 +5,15 @@ module UART(
 input CLOCK_50,
 input [1:0]KEY,
 input [9:0] SW,
-output [39:0] GPIO,
+inout [39:0] GPIO,
 output wire [9:0] LEDR
 );
 
 reg enable;
-reg load;
+reg r;
+reg RShift;
+reg [3:0] n;
+reg [1:0] count;
 wire rollover86;
 wire rollover43;
 wire rollover10;
@@ -19,67 +22,53 @@ reg check;
 reg [3:0] numer;
 reg [3:0] pulse;
 wire [9:0] display1;
+//ECE4623
 
 reg [2:0] state, next_state;
 
 Timer868 timer868( .clk(CLOCK_50), .Rollover(rollover86));
-Timer43 timer43( .clk(CLOCK_50), .Rollover(rollover43));
+Timer43 timer43( .clk(CLOCK_50), .Rollover(rollover43), .s_reset(GPIO[0]));
 Timer10 timer10( .clk(CLOCK_50), .Rollover(rollover10));
-ShiftReg shiftyboy ( .clk(CLOCK_50), .load(load), .enable(enable), .out(GPIO[1]), .lights(display1), .ascii(SW[7:0]));
+ShiftReg shiftyboy ( .clk(CLOCK_50), .enable(RShift), .out(LEDR[7:0]), .ascii(GPIO[0]));
 
-
-always @(posedge rollover86) begin
+always @(posedge CLOCK_50) begin
 	state <= next_state;
-end
-
-
-
-always @(posedge rollover43)begin
-	enable <= !enable;
 end
 
 //State transition logic
 always @(*) begin
-
 	case(state)
-		3'd0: next_state <= (KEY[1] == 1'b1) ? 3'h1 : 3'h0;
-		3'd1: next_state <= 3'h2;
-		3'd2: next_state <= (pulse >= 4'b1010 && KEY[1] == 1'b0) ? 3'h0 : 3'h2;
+		3'd0: next_state <= (enable) ? 3'h1 : 3'h0;
+		3'd1: next_state <= (n >= 4'b1001) ? 3'h0 : 3'h2;
+		3'd2: next_state <= (count >= 2'b10) ? 3'h1 : 3'h2;
 	endcase
 end
 
-always @(posedge rollover10) begin
+always @(posedge CLOCK_50) begin
 	if(state == 3'h0) begin
-		load <= 1'b1;
-		
+		n <= 1'b0;
 	end
 	if(state == 3'h1) begin
-		load <= 1'b0;
+		r <= 1'b1;
+		n <= n + 1'b1;
+		count <= 1'b0;
 	end
 	if (state == 3'h2) begin
-		//enable <= 1'b0;
-		load <= 1'b0;
-	
+		r <= 1'b0;
+		count <= count + 1'b1;
 	end
 end
 
 
-assign LEDR = display1;
+always @(posedge CLOCK_50) begin
 
-always @(posedge rollover86) begin
-
-	if(pulse >= 4'b1010) begin
-		pulse <= pulse + 1'b1; //
-		//
-		pulse <= 4'b0000;
-		
+	if(r) begin
+		RShift <= !RShift;
 		
 	end
 	else begin
-	pulse <= pulse + 1'b1;
+		RShift <= RShift;
 
 	end
 end
-
-
 endmodule
