@@ -12,7 +12,7 @@ end
 always @ (posedge clk) begin
    Rollover = 1'b0;
    //833333
-   if (count == 500000) begin
+   if (count == 50000000) begin
       Rollover = 1'b1;
       count = 0;
    end

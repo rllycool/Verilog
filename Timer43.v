@@ -19,10 +19,10 @@ always @ (posedge clk) begin
    end
 
 
-//   if (s_reset) begin
-//      Rollover = 1'b0;
-//      count = 0;
-//   end
+   if (s_reset) begin
+      Rollover = 1'b0;
+      count = 0;
+   end
 
    count = count + 1;
 end
